@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+var fs = require("fs"); // filestream
+var path = require("path"); // working directory
+var osm_geojson = require("osm-and-geojson"); // object stream
+var argv = require('yargs') // option parser
+	.alias('h','help')
+	.help('h')
+	.alias('i','in')
+	.describe('in', 'input filename')
+	.alias('o', 'out')
+	.describe('out', 'output filename')
+	.demandOption(['i','o'])
+	.example('$0 -i Ghana.geojson -o Ghana.osm')
+	.usage('Usage: $0 [options]')
+	.argv;
+
+var content = fs.readFileSync(argv.i);
+var jsonContent = JSON.parse(content);
+var newContent = osm_geojson.geojson2osm(jsonContent);
+fs.writeFile(argv.o, newContent, (err) => {
+	if (err) throw err;
+});
