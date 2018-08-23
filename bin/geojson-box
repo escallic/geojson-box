@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+// Collect GeoJSON features by coordinate bounds
+
+var fs = require("fs"); // filestream
+var path = require("path"); // working directory
+var jss = require("JSONStream"); // object stream
+var argv = require('yargs') // option parser
+	.alias('h','help')
+	.help('h')
+	.alias('i','in')
+	.describe('in', 'input filename')
+	.alias('o', 'out')
+	.describe('out', 'output filename')
+	.option('p', {
+		alias: 'precision',
+		default: 0.001,
+		describe: 'corresponds to size of bounding box'
+	})
+	.alias('x', 'longitude')
+	.describe('longitude', 'the second decimal')
+	.alias('y', 'latitude')
+	.describe('latitude', 'the first decimal')
+	.demandOption(['i','o','x','y'])
+	.example('$0 -x 5.55800 -y -0.21200 -i Ghana.geojson -o test.geojson')
+	.usage('Usage: $0 [options]')
+	.argv;
+
+// calculate the bounds
+var westBound = argv.x - argv.p;
+var eastBound = argv.x + argv.p;
+var southBound = argv.y - argv.p;
+var northBound = argv.y + argv.p;
+
+// outputs the collected features to a new file
+var output = function(features) {
+	var buf = {
+		"type": "FeatureCollection",
+		"features": features
+	};
+	fs.writeFile(argv.o, JSON.stringify(buf, 'utf8'), (err) => {
+		if (err) throw err;
+	});
+}
+
+// input and parse the features from JSON file
+var input = fs.createReadStream(argv.i, {flags: "r", encoding: "utf8"});
+var stream = jss.parse("features.*");
+var features = {};
+stream
+	.on('data', function (data) {
+		if ((data.geometry.coordinates[0][0][1] > southBound) &&
+			(data.geometry.coordinates[0][0][1] < northBound)) {
+			if (data.geometry.coordinates[0][0][0] > westBound &&
+				data.geometry.coordinates[0][0][0] < eastBound) {
+				features[data.type[dummy]].push(data);
+				console.log('feature detected!');
+			}
+		}
+	})
+	.on('end', function () {
+		for (var k in features) {
+			output(features[k]);
+		}
+	});
+input.pipe(stream);
