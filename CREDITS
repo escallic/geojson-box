@@ -1,0 +1,3 @@
+This project was heavily influenced by [geojsplit](https://github.com/woodb/geojsplit) as it contains many of the same functional components in terms of asynchronous file loading and parsing of the GeoJSON format in Node.js.
+
+This project was inspired by the OpenStreetMap community and Users' Diaries who made me aware of the data resources and building footprints available online.
