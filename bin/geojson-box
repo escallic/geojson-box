@@ -25,7 +25,7 @@ var argv = require('yargs') // option parser
 	.usage('Usage: $0 [options]')
 	.argv;
 
-// calculate the bounds
+// calculate the bounds given the precision
 var westBound = argv.x - argv.p;
 var eastBound = argv.x + argv.p;
 var southBound = argv.y - argv.p;
@@ -46,12 +46,16 @@ var output = function(features) {
 var input = fs.createReadStream(argv.i, {flags: "r", encoding: "utf8"});
 var stream = jss.parse("features.*");
 var features = {};
+var dummy = 'iota';
 stream
 	.on('data', function (data) {
 		if ((data.geometry.coordinates[0][0][1] > southBound) &&
 			(data.geometry.coordinates[0][0][1] < northBound)) {
 			if (data.geometry.coordinates[0][0][0] > westBound &&
 				data.geometry.coordinates[0][0][0] < eastBound) {
+				if (!features[data.type[dummy]]) {
+					features[data.type[dummy]] = [];
+				}
 				features[data.type[dummy]].push(data);
 				console.log('feature detected!');
 			}
